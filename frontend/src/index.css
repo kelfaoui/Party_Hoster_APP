@@ -1,0 +1,210 @@
+@import "tailwindcss";
+
+/* Styles pour la carte Leaflet */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.custom-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-popup-content {
+  font-family: 'Inter', sans-serif;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-popup-content h3 {
+  color: #1f2937;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.leaflet-popup-content p {
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.leaflet-popup-content a {
+  display: inline-block;
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.leaflet-popup-content a:hover {
+  background-color: #2563eb;
+}
+
+/* Styles pour le défilement de la liste */
+.max-h-\[500px\] {
+  max-height: 500px;
+}
+
+/* Scrollbar personnalisée */
+.pr-2::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pr-2::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.pr-2::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.pr-2::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Styles pour la modale */
+.fixed {
+  position: fixed;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.z-50 {
+  z-index: 50;
+}
+
+/* Animation d'entrée de la modale */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bg-white {
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+/* Styles pour le range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-track {
+  background: #e5e7eb;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 1.25rem;
+  width: 1.25rem;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+input[type="range"]::-moz-range-track {
+  background: #e5e7eb;
+  height: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+input[type="range"]::-moz-range-thumb {
+  height: 1.25rem;
+  width: 1.25rem;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Dans votre fichier CSS global */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.text-yellow-500 {
+  color: #fbbf24;
+}
+
+.text-gray-300 {
+  color: #d1d5db;
+}
+
+/* Animation pour les boutons étoiles */
+button.text-yellow-500:hover,
+button.text-gray-300:hover:not(:disabled) {
+  transform: scale(1.2);
+  transition: transform 0.2s;
+}
+
+/* Style pour le bouton "Vous" */
+.bg-blue-100 {
+  background-color: #dbeafe;
+}
+
+.text-blue-800 {
+  color: #1e40af;
+}
+
+/* Dans votre fichier CSS global */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.text-yellow-500 {
+  color: #fbbf24;
+}
+
+.text-gray-300 {
+  color: #d1d5db;
+}
+
+/* Animation pour les boutons étoiles */
+button.text-yellow-500:hover,
+button.text-gray-300:hover:not(:disabled) {
+  transform: scale(1.2);
+  transition: transform 0.2s;
+}
+
+/* Style pour le bouton "Vous" */
+.bg-blue-100 {
+  background-color: #dbeafe;
+}
+
+.text-blue-800 {
+  color: #1e40af;
+}
+
+.logo-white {
+  filter: brightness(0) invert(1);
+}
