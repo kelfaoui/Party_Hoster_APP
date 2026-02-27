@@ -1,19 +1,23 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState } from 'react';
 import { FaPaperPlane, FaCheckCircle } from 'react-icons/fa';
 
-const Newsletter = (): React.ReactElement => {
-  const [email, setEmail] = useState<string>('');
-  const [subscribed, setSubscribed] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+const Newsletter = () => {
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
+
     setLoading(true);
+    // Simuler l'envoi à l'API
     setTimeout(() => {
       setSubscribed(true);
       setLoading(false);
       setEmail('');
+      
+      // Réinitialiser après 5 secondes
       setTimeout(() => setSubscribed(false), 5000);
     }, 1500);
   };
@@ -35,11 +39,14 @@ const Newsletter = (): React.ReactElement => {
               </div>
             ) : (
               <>
-                <h2 className="text-4xl font-bold text-gray-800 mb-4">Restez Informé</h2>
+                <h2 className="text-4xl font-bold text-gray-800 mb-4">
+                  Restez Informé
+                </h2>
                 <p className="text-gray-600 text-lg mb-8 max-w-2xl mx-auto">
-                  Inscrivez-vous à notre newsletter pour recevoir les dernières offres, les nouvelles
-                  salles disponibles et des conseils pour vos événements.
+                  Inscrivez-vous à notre newsletter pour recevoir les dernières offres,
+                  les nouvelles salles disponibles et des conseils pour vos événements.
                 </p>
+                
                 <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-grow">
@@ -59,17 +66,18 @@ const Newsletter = (): React.ReactElement => {
                     >
                       {loading ? (
                         <span className="flex items-center">
-                          <div className="animate-spin rounded-xl h-5 w-5 border-b-2 border-white mr-3" />
+                          <div className="animate-spin rounded-xl h-5 w-5 border-b-2 border-white mr-3"></div>
                           Envoi...
                         </span>
                       ) : (
                         <span className="flex items-center">
-                          S&apos;inscrire
+                          S'inscrire
                           <FaPaperPlane className="ml-3" />
                         </span>
                       )}
                     </button>
                   </div>
+                  
                   <p className="text-gray-500 text-sm mt-4">
                     En vous inscrivant, vous acceptez notre{' '}
                     <a href="/privacy" className="text-primary hover:underline">

@@ -6,16 +6,16 @@ import Newsletter from '../components/Newsletter';
 import Presentation from '../components/Presentation';
 import Footer from '../components/Footer';
 
-const Home = (): React.ReactElement => {
+const Home = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow">
         <Carousel />
-        <div className="px-3">
-          <SalleList />
-          <Presentation />
-          <Newsletter />
+        <div class="px-3">
+        <SalleList />
+        <Presentation />
+        <Newsletter />
         </div>
       </main>
       <Footer />
