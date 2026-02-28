@@ -24,6 +24,10 @@ import OwnerEditSalle from './pages/Owner/EditSalle';
 import ClientLayout from './components/Client/ClientLayout';
 import ClientDashboard from './pages/Client/ClientDashboard';
 import ClientReservations from './pages/Client/ClientReservations';
+import AdminNotations from './pages/Admin/Notations';
+import AdminCommentaires from './pages/Admin/Commentaires';
+import OwnerNotations from './pages/Owner/Notations';
+import OwnerCommentaires from './pages/Owner/Commentaires';
 
 function App() {
   return (
@@ -47,6 +51,8 @@ function App() {
           <Route path="reservations" element={<Reservations />} /> {/* /admin/reservations */}
           <Route path="salles" element={<AdminSalles />} /> {/* /admin/salles */}
           <Route path="salles/modifier/:id" element={<EditSalle />} /> {/* /admin/salles/modifier/:id */}
+          <Route path="notations" element={<AdminNotations />} /> {/* /admin/notations */}
+          <Route path="commentaires" element={<AdminCommentaires />} /> {/* /admin/commentaires */}
       </Route>
 
       {/* Proprietaire */}
@@ -56,6 +62,8 @@ function App() {
           <Route path="reservations" element={<OwnerReservations />} /> {/* /owner/reservations */}
           <Route path="salles" element={<OwnerSalles />} /> {/* /owner/salles */}
           <Route path="salles/modifier/:id" element={<OwnerEditSalle />} /> {/* /owner/salles/modifier/:id */}
+          <Route path="notations" element={<OwnerNotations />} /> {/* /owner/notations */}
+          <Route path="commentaires" element={<OwnerCommentaires />} /> {/* /owner/commentaires */}
       </Route>
 
       {/* Client */}

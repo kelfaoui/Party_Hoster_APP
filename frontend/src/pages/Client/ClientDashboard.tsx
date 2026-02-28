@@ -22,6 +22,8 @@ const ClientDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [recentReservations, setRecentReservations] = useState([]);
   const [recentUsers, setRecentUsers] = useState([]);
+  const [selectedReservation, setSelectedReservation] = useState<any>(null);
+  const [showReservationModal, setShowReservationModal] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -29,7 +31,7 @@ const ClientDashboard = () => {
         setLoading(true);
         
         // Récupérer les statistiques
-        const [reservationsRes, sallesRes, usersRes] = await Promise.all([
+        const [reservationsRes, sallesRes] = await Promise.all([
           api.get('/reservations/mes-reservations?limit=1000'),
           api.get('/salles/mes-salles?limit=1000')
         ]);
@@ -43,27 +45,29 @@ const ClientDashboard = () => {
         const thisMonth = now.getMonth();
         const thisYear = now.getFullYear();
 
-        const reservationsThisMonth = reservations.filter(res => {
+        const reservationsThisMonth = reservations.filter((res: any) => {
           const resDate = new Date(res.date_creation || res.created_at);
           return resDate.getMonth() === thisMonth && resDate.getFullYear() === thisYear;
         });
 
     
 
-        const revenueTotal = reservations.reduce((sum, res) => {
+        const revenueTotal = reservations.reduce((sum: number, res: any) => {
           return sum + parseFloat(res.prix_total || 0);
         }, 0);
 
         setStats({
           totalReservations: reservations.length,
           totalSalles: salles.length,
+          totalUtilisateurs: 0,
           revenueTotal,
           reservationsThisMonth: reservationsThisMonth.length,
+          newUsersThisMonth: 0
         });
 
         // Récupérer les réservations récentes
         const recentRes = reservations
-          .sort((a, b) => new Date(b.date_creation) - new Date(a.date_creation))
+          .sort((a: any, b: any) => new Date(b.date_creation || b.created_at).getTime() - new Date(a.date_creation || a.created_at).getTime())
           .slice(0, 5);
         setRecentReservations(recentRes);
 
@@ -76,6 +80,20 @@ const ClientDashboard = () => {
 
     fetchDashboardData();
   }, []);
+
+  const handleViewReservationDetails = (reservation: any) => {
+    setSelectedReservation(reservation);
+    setShowReservationModal(true);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Confirme': return 'bg-green-100 text-green-800';
+      case 'EnAttente': return 'bg-yellow-100 text-yellow-800';
+      case 'Annule': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   const statCards = [
     {
@@ -148,79 +166,79 @@ const ClientDashboard = () => {
       {/* Graphiques et tableaux */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Réservations récentes */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className="bg-white rounded-xl shadow-sm p-6 lg:col-span-2">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-gray-800">Réservations Récentes</h2>
-            <button className="text-primary hover:text-primary-dark text-sm font-medium">
+            <h2 className="text-lg font-bold text-gray-800">Vos Réservations</h2>
+            <button 
+              onClick={() => window.location.href = '/client/reservations'}
+              className="text-primary hover:text-primary-dark text-sm font-medium"
+            >
               Voir tout
             </button>
           </div>
           
           <div className="space-y-4">
-            {recentReservations.map((reservation) => (
-              <div key={reservation.reservation_id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
-                <div>
-                  <div className="font-medium text-gray-800">
-                    Réservation #{reservation.reservation_id}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {new Date(reservation.date_creation).toLocaleDateString('fr-FR')}
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-medium text-gray-800">
-                    {parseFloat(reservation.prix_total || 0).toLocaleString()} €
-                  </div>
-                  <span className={`px-2 py-1 rounded-xl text-xs ${
-                    reservation.statut === 'Confirme' ? 'bg-green-100 text-green-800' :
-                    reservation.statut === 'EnAttente' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {reservation.statut}
-                  </span>
-                </div>
+            {recentReservations.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <FaCalendarAlt className="mx-auto text-4xl text-gray-300 mb-4" />
+                <p>Vous n'avez pas encore de réservations</p>
+                <button 
+                  onClick={() => window.location.href = '/salles'}
+                  className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                >
+                  Réserver une salle
+                </button>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Utilisateurs récents */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-gray-800">Utilisateurs Récents</h2>
-            <button className="text-primary hover:text-primary-dark text-sm font-medium">
-              Voir tout
-            </button>
-          </div>
-          
-          <div className="space-y-4">
-            {recentUsers.map((user) => (
-              <div key={user.utilisateur_id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center">
-                    <FaUsers className="text-gray-500" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-800">
-                      {user.prenom} {user.nom}
+            ) : (
+              recentReservations.map((reservation: any) => (
+                <div 
+                  key={reservation.reservation_id} 
+                  className="p-4 hover:bg-gray-50 rounded-lg border border-gray-200 cursor-pointer transition-colors"
+                  onClick={() => handleViewReservationDetails(reservation)}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <div className="font-medium text-gray-800 flex items-center">
+                        <FaDoorOpen className="mr-2 text-gray-400" />
+                        {reservation.salle_nom || 'Salle non spécifiée'}
+                      </div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        Réservation #{reservation.reservation_id}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
+                    <div className="text-right">
+                      <div className="font-bold text-gray-800">
+                        {parseFloat(reservation.prix_total || 0).toLocaleString()} €
+                      </div>
+                      <span className={`px-2 py-1 rounded-xl text-xs font-medium ${getStatusColor(reservation.statut)}`}>
+                        {reservation.statut}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center text-sm text-gray-600">
+                    <FaCalendarAlt className="mr-2 text-gray-400" />
+                    <div>
+                      <div>{new Date(reservation.heure_debut).toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {new Date(reservation.heure_debut).toLocaleTimeString('fr-FR', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })} - {new Date(reservation.heure_fin).toLocaleTimeString('fr-FR', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm text-gray-500">
-                    {new Date(user.date_creation).toLocaleDateString('fr-FR')}
-                  </div>
-                  <span className={`px-2 py-1 rounded-xl text-xs ${
-                    user.type === 'Administrateur' ? 'bg-purple-100 text-purple-800' :
-                    user.type === 'Proprietaire' ? 'bg-blue-100 text-blue-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`}>
-                    {user.type}
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -243,6 +261,114 @@ const ClientDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal des détails de réservation */}
+      {showReservationModal && selectedReservation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-gray-800">Détails de la Réservation</h2>
+              <button
+                onClick={() => setShowReservationModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Informations principales */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Numéro de réservation</h3>
+                    <p className="text-lg font-semibold text-gray-800">#{selectedReservation.reservation_id}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Salle</h3>
+                    <p className="text-lg font-semibold text-gray-800 flex items-center">
+                      <FaDoorOpen className="mr-2 text-gray-400" />
+                      {selectedReservation.salle_nom || 'Salle non spécifiée'}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Statut</h3>
+                    <span className={`px-3 py-1 rounded-xl text-sm font-medium ${getStatusColor(selectedReservation.statut)}`}>
+                      {selectedReservation.statut}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Date de réservation</h3>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {new Date(selectedReservation.heure_debut).toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Horaires</h3>
+                    <p className="text-lg font-semibold text-gray-800 flex items-center">
+                      <FaCalendarAlt className="mr-2 text-gray-400" />
+                      {new Date(selectedReservation.heure_debut).toLocaleTimeString('fr-FR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })} - {new Date(selectedReservation.heure_fin).toLocaleTimeString('fr-FR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Prix total</h3>
+                    <p className="text-2xl font-bold text-green-600">
+                      {parseFloat(selectedReservation.prix_total || 0).toLocaleString()} €
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Informations supplémentaires */}
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Informations complémentaires</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Durée de la réservation</h4>
+                    <p className="text-gray-800">
+                      {Math.round((new Date(selectedReservation.heure_fin).getTime() - new Date(selectedReservation.heure_debut).getTime()) / (1000 * 60 * 60) * 10) / 10} heures
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Date de création</h4>
+                    <p className="text-gray-800">
+                      {new Date(selectedReservation.date_creation || selectedReservation.created_at).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="border-t pt-6 flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowReservationModal(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Fermer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

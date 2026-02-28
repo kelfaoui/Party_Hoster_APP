@@ -7,6 +7,8 @@ import {
   FaCalendarAlt, 
   FaDoorOpen, 
   FaUsers,
+  FaStar,
+  FaComment,
   FaSignOutAlt 
 } from 'react-icons/fa';
 
@@ -30,6 +32,16 @@ const OwnerSidebar = () => {
       icon: <FaDoorOpen className="w-5 h-5" />,
       label: 'Salles'
     },
+    {
+      path: '/owner/notations',
+      icon: <FaStar className="w-5 h-5" />,
+      label: 'Notations'
+    },
+    {
+      path: '/owner/commentaires',
+      icon: <FaComment className="w-5 h-5" />,
+      label: 'Commentaires'
+    }
   ];
 
   const isActive = (path, exact = false) => {

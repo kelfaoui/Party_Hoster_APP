@@ -7,6 +7,8 @@ import {
   FaCalendarAlt, 
   FaDoorOpen, 
   FaUsers,
+  FaStar,
+  FaComment,
   FaSignOutAlt 
 } from 'react-icons/fa';
 
@@ -34,6 +36,16 @@ const AdminSidebar = () => {
       path: '/admin/utilisateurs',
       icon: <FaUsers className="w-5 h-5" />,
       label: 'Utilisateurs'
+    },
+    {
+      path: '/admin/notations',
+      icon: <FaStar className="w-5 h-5" />,
+      label: 'Notations'
+    },
+    {
+      path: '/admin/commentaires',
+      icon: <FaComment className="w-5 h-5" />,
+      label: 'Commentaires'
     }
   ];
 

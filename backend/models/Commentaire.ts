@@ -50,6 +50,35 @@ class Commentaire {
         ) as [ { affectedRows: number }, unknown ];
         return result.affectedRows;
     }
+
+    static async findAll(limit: number = 100, offset: number = 0): Promise<Record<string, unknown>[]> {
+        const [rows] = await pool.execute(
+            `SELECT c.*, u.nom as utilisateur_nom, u.prenom as utilisateur_prenom, 
+                    s.nom as salle_nom, s.utilisateur_id as proprietaire_id
+             FROM commentaires c
+             JOIN utilisateurs u ON c.utilisateur_id = u.utilisateur_id
+             JOIN salles s ON c.salle_id = s.salle_id
+             ORDER BY c.date_creation DESC
+             LIMIT ? OFFSET ?`,
+            [limit, offset]
+        ) as [Record<string, unknown>[], unknown];
+        return rows;
+    }
+
+    static async findByOwnerId(proprietaireId: number | string, limit: number = 100, offset: number = 0): Promise<Record<string, unknown>[]> {
+        const [rows] = await pool.execute(
+            `SELECT c.*, u.nom as utilisateur_nom, u.prenom as utilisateur_prenom, 
+                    s.nom as salle_nom
+             FROM commentaires c
+             JOIN utilisateurs u ON c.utilisateur_id = u.utilisateur_id
+             JOIN salles s ON c.salle_id = s.salle_id
+             WHERE s.utilisateur_id = ?
+             ORDER BY c.date_creation DESC
+             LIMIT ? OFFSET ?`,
+            [proprietaireId, limit, offset]
+        ) as [Record<string, unknown>[], unknown];
+        return rows;
+    }
 }
 
 export default Commentaire;

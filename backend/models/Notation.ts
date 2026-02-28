@@ -58,6 +58,43 @@ class Notation {
         ) as [ { affectedRows: number }, unknown ];
         return result.affectedRows;
     }
+
+    static async findAll(limit: number = 100, offset: number = 0): Promise<Record<string, unknown>[]> {
+        const [rows] = await pool.execute(
+            `SELECT n.*, u.nom as utilisateur_nom, u.prenom as utilisateur_prenom, 
+                    s.nom as salle_nom, s.utilisateur_id as proprietaire_id
+             FROM notations n
+             JOIN utilisateurs u ON n.utilisateur_id = u.utilisateur_id
+             JOIN salles s ON n.salle_id = s.salle_id
+             ORDER BY n.date_creation DESC
+             LIMIT ? OFFSET ?`,
+            [limit, offset]
+        ) as [Record<string, unknown>[], unknown];
+        return rows;
+    }
+
+    static async findByOwnerId(proprietaireId: number | string, limit: number = 100, offset: number = 0): Promise<Record<string, unknown>[]> {
+        const [rows] = await pool.execute(
+            `SELECT n.*, u.nom as utilisateur_nom, u.prenom as utilisateur_prenom, 
+                    s.nom as salle_nom
+             FROM notations n
+             JOIN utilisateurs u ON n.utilisateur_id = u.utilisateur_id
+             JOIN salles s ON n.salle_id = s.salle_id
+             WHERE s.utilisateur_id = ?
+             ORDER BY n.date_creation DESC
+             LIMIT ? OFFSET ?`,
+            [proprietaireId, limit, offset]
+        ) as [Record<string, unknown>[], unknown];
+        return rows;
+    }
+
+    static async findById(notationId: number | string): Promise<Record<string, unknown> | null> {
+        const [rows] = await pool.execute(
+            'SELECT * FROM notations WHERE notation_id = ?',
+            [notationId]
+        ) as [Record<string, unknown>[], unknown];
+        return rows[0] || null;
+    }
 }
 
 export default Notation;

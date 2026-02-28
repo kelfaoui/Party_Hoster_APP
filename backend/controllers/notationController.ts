@@ -2,6 +2,124 @@ import { Request, Response } from 'express';
 import Notation from '../models/Notation.js';
 
 class NotationController {
+    /**
+     * @swagger
+     * /notations/all:
+     *   get:
+     *     summary: Récupérer toutes les notations (Admin/Propriétaire)
+     *     tags: [Notations]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: query
+     *         name: limit
+     *         schema:
+     *           type: integer
+     *           default: 100
+     *         description: Nombre maximum de résultats
+     *       - in: query
+     *         name: offset
+     *         schema:
+     *           type: integer
+     *           default: 0
+     *         description: Nombre de résultats à sauter
+     *     responses:
+     *       200:
+     *         description: Liste des notations récupérée avec succès
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *               items:
+     *                 $ref: '#/components/schemas/Notation'
+     *       403:
+     *         description: Non autorisé
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Error'
+     *       500:
+     *         description: Erreur serveur
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Error'
+     */
+    static async getAll(req: Request, res: Response): Promise<void> {
+        try {
+            const { limit = 100, offset = 0 } = req.query;
+            
+            if (req.user!.type !== 'Administrateur' && req.user!.type !== 'Proprietaire') {
+                res.status(403).json({ message: 'Non autorisé' });
+                return;
+            }
+
+            const notations = await Notation.findAll(Number(limit), Number(offset));
+            res.json(notations);
+        } catch (error) {
+            res.status(500).json({ message: (error as Error).message });
+        }
+    }
+
+    /**
+     * @swagger
+     * /notations/owner:
+     *   get:
+     *     summary: Récupérer les notations des salles du propriétaire
+     *     tags: [Notations]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: query
+     *         name: limit
+     *         schema:
+     *           type: integer
+     *           default: 100
+     *         description: Nombre maximum de résultats
+     *       - in: query
+     *         name: offset
+     *         schema:
+     *           type: integer
+     *           default: 0
+     *         description: Nombre de résultats à sauter
+     *     responses:
+     *       200:
+     *         description: Notations des salles du propriétaire récupérées avec succès
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *               items:
+     *                 $ref: '#/components/schemas/Notation'
+     *       403:
+     *         description: Non autorisé
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Error'
+     *       500:
+     *         description: Erreur serveur
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Error'
+     */
+    static async getOwnerNotations(req: Request, res: Response): Promise<void> {
+        try {
+            const { limit = 100, offset = 0 } = req.query;
+            
+            if (req.user!.type !== 'Proprietaire') {
+                res.status(403).json({ message: 'Non autorisé' });
+                return;
+            }
+
+            const notations = await Notation.findByOwnerId(req.user!.utilisateur_id, Number(limit), Number(offset));
+            res.json(notations);
+        } catch (error) {
+            res.status(500).json({ message: (error as Error).message });
+        }
+    }
+
     static async createOrUpdate(req: Request, res: Response): Promise<void> {
         try {
             const { salle_id, note } = req.body;
@@ -44,8 +162,9 @@ class NotationController {
 
     static async getBySalle(req: Request, res: Response): Promise<void> {
         try {
-            const notations = await Notation.findBySalleId(req.params.id);
-            const stats = await Notation.getMoyenneSalle(req.params.id);
+            const salleId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+            const notations = await Notation.findBySalleId(salleId);
+            const stats = await Notation.getMoyenneSalle(salleId);
             
             res.json({
                 notations,
@@ -59,9 +178,10 @@ class NotationController {
 
     static async getMaNotation(req: Request, res: Response): Promise<void> {
         try {
+            const salleId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
             const notation = await Notation.findByUtilisateurAndSalle(
                 req.user!.utilisateur_id,
-                req.params.id
+                salleId
             );
             
             res.json(notation || {});
@@ -70,12 +190,55 @@ class NotationController {
         }
     }
 
+    /**
+     * @swagger
+     * /notations/{id}:
+     *   delete:
+     *     summary: Supprimer une notation
+     *     tags: [Notations]
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: integer
+     *         description: ID de la notation à supprimer
+     *     responses:
+     *       200:
+     *         description: Notation supprimée avec succès
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 message:
+     *                   type: string
+     *                   example: "Notation supprimée avec succès"
+     *       403:
+     *         description: Non autorisé
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Error'
+     *       404:
+     *         description: Notation non trouvée
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Error'
+     *       500:
+     *         description: Erreur serveur
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/Error'
+     */
     static async delete(req: Request, res: Response): Promise<void> {
         try {
-            const notation = await Notation.findByUtilisateurAndSalle(
-                req.user!.utilisateur_id,
-                req.params.salleId
-            ) as Record<string, unknown> | null;
+            const notationId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+            const notation = await Notation.findById(notationId) as Record<string, unknown> | null;
 
             if (!notation) {
                 res.status(404).json({ message: 'Notation non trouvée' });
@@ -87,15 +250,9 @@ class NotationController {
                 return;
             }
 
-            await Notation.delete(notation.notation_id as number);
+            await Notation.delete(notationId);
             
-            const stats = await Notation.getMoyenneSalle(req.params.salleId);
-            
-            res.json({
-                message: 'Notation supprimée',
-                nouvelle_moyenne: parseFloat(String(stats.moyenne)) || 0,
-                total_notes: stats.total_notes
-            });
+            res.json({ message: 'Notation supprimée avec succès' });
         } catch (error) {
             res.status(500).json({ message: (error as Error).message });
         }
