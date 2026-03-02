@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 import utilisateurRoutes from './routes/utilisateurRoutes.js';
 import salleRoutes from './routes/salleRoutes.js';
@@ -35,8 +34,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
     customSiteTitle: 'API Party Hoster - Documentation'
 }));
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
     setHeaders: (res, filePath) => {
       res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
