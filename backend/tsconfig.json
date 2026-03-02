@@ -11,19 +11,21 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": true,
+    "declaration": false,
     "types": ["node"],
     "typeRoots": ["./node_modules/@types"],
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": false
   },
   "include": [
     "config/**/*.ts",
     "controllers/**/*.ts",
+    "utils/**/*.ts",
     "middleware/**/*.ts",
     "models/**/*.ts",
     "routes/**/*.ts",
     "types/**/*.ts",
     "server.ts"
   ],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist","test"]
 }
