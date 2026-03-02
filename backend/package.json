@@ -2,12 +2,14 @@
   "name": "reservations-salles-api",
   "version": "1.0.0",
   "description": "API de gestion de réservations de salles",
-  "main": "server.js",
+  "main": "dist/server.js",
   "type": "module",
   "scripts": {
     "start": "tsx server.ts",
     "dev": "tsx watch server.ts",
-    "test": "mocha --config test/mocha.config.json"
+    "test": "mocha --config test/mocha.config.json",
+    "build": "tsc",
+    "start:prod": "node dist/server.js"
   },
   "keywords": [
     "reservation",
@@ -43,6 +45,8 @@
     "@types/node": "^25.2.2",
     "@types/sinon": "^21.0.0",
     "@types/supertest": "^7.2.0",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "chai": "^6.2.2",
     "mocha": "^11.7.5",
     "nodemon": "^3.1.11",
