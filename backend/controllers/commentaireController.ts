@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Commentaire from '../models/Commentaire.js';
+import Salle from '../models/Salle.js';
 
 class CommentaireController {
     /**
@@ -292,15 +293,53 @@ class CommentaireController {
                 return;
             }
 
-            if (commentaire.utilisateur_id !== req.user!.utilisateur_id && req.user!.type !== 'Administrateur') {
-                res.status(403).json({ message: 'Non autorisé' });
+            // Debug: Afficher le type d'utilisateur
+            console.log('=== DEBUG COMMENTAIRE DELETE ===');
+            console.log('User type:', req.user!.type);
+            console.log('User ID:', req.user!.utilisateur_id);
+            console.log('Commentaire user ID:', commentaire.utilisateur_id);
+            console.log('Commentaire salle ID:', commentaire.salle_id);
+            console.log('Type includes Proprietaire:', req.user!.type.includes('Proprietaire'));
+            console.log('Type includes proprietaire:', req.user!.type.toLowerCase().includes('proprietaire'));
+            console.log('Type === Proprietaire:', req.user!.type === 'Proprietaire');
+            console.log('Type === proprietaire:', req.user!.type === 'proprietaire');
+
+            // Admin peut tout supprimer
+            if (req.user!.type === 'Administrateur') {
+                console.log('Admin deletion allowed');
+                await Commentaire.delete(commentaireId);
+                res.json({ message: 'Commentaire supprimé avec succès' });
                 return;
             }
 
-            await Commentaire.delete(commentaireId);
-            
-            res.json({ message: 'Commentaire supprimé avec succès' });
+            // Utilisateur peut supprimer son propre commentaire
+            if (commentaire.utilisateur_id === req.user!.utilisateur_id) {
+                console.log('User deletion allowed (own commentaire)');
+                await Commentaire.delete(commentaireId);
+                res.json({ message: 'Commentaire supprimé avec succès' });
+                return;
+            }
+
+            // Owner peut supprimer les commentaires de ses salles (vérification large)
+            if (req.user!.type.includes('Proprietaire') || req.user!.type.toLowerCase().includes('proprietaire')) {
+                console.log('Owner type detected, checking salle ownership...');
+                const salle = await Salle.findById(commentaire.salle_id as string) as Record<string, unknown> | null;
+                console.log('Salle found:', salle);
+                console.log('Salle owner ID:', salle?.utilisateur_id);
+                
+                if (salle && salle.utilisateur_id === req.user!.utilisateur_id) {
+                    console.log('Owner deletion allowed (owns salle)');
+                    await Commentaire.delete(commentaireId);
+                    res.json({ message: 'Commentaire supprimé avec succès' });
+                    return;
+                }
+            }
+
+            // Si aucune des conditions ci-dessus n'est remplie
+            console.log('Deletion not allowed - 403');
+            res.status(403).json({ message: 'Non autorisé' });
         } catch (error) {
+            console.error('Error in delete commentaire:', error);
             res.status(500).json({ message: (error as Error).message });
         }
     }

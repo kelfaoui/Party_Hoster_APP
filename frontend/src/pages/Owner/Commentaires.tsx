@@ -2,9 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { FaComment, FaSearch, FaFilter, FaTrash, FaEdit } from 'react-icons/fa';
 import api from '../../api/axiosConfig';
 
+interface Commentaire {
+  commentaire_id: number;
+  utilisateur_id: number;
+  utilisateur_nom: string;
+  utilisateur_prenom: string;
+  salle_id: number;
+  salle_nom: string;
+  commentaire: string;
+  date_creation: string;
+}
+
 const Commentaires = () => {
-  const [commentaires, setCommentaires] = useState([]);
-  const [filteredCommentaires, setFilteredCommentaires] = useState([]);
+  const [commentaires, setCommentaires] = useState<Commentaire[]>([]);
+  const [filteredCommentaires, setFilteredCommentaires] = useState<Commentaire[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,7 +32,7 @@ const Commentaires = () => {
   const fetchCommentaires = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/commentaires/owner?limit=1000');
+      const response = await api.get('/commentaires/all?limit=1000');
       setCommentaires(response.data);
       setFilteredCommentaires(response.data);
     } catch (error) {
@@ -37,7 +48,7 @@ const Commentaires = () => {
     // Filtrer par terme de recherche
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter((comment: any) => 
+      filtered = filtered.filter((comment) => 
         comment.commentaire_id.toString().includes(term) ||
         (comment.utilisateur_nom && comment.utilisateur_nom.toLowerCase().includes(term)) ||
         (comment.utilisateur_prenom && comment.utilisateur_prenom.toLowerCase().includes(term)) ||
@@ -46,18 +57,25 @@ const Commentaires = () => {
       );
     }
 
+    // Trier par date (la plus récente en premier)
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.date_creation);
+      const dateB = new Date(b.date_creation);
+      return dateB.getTime() - dateA.getTime();
+    });
+
     setFilteredCommentaires(filtered);
     setCurrentPage(1);
   };
 
-  const handleDeleteCommentaire = async (id: any) => {
+  const handleDeleteCommentaire = async (id: number) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
       return;
     }
 
     try {
       await api.delete(`/commentaires/${id}`);
-      setCommentaires(commentaires.filter((comment: any) => comment.commentaire_id !== id));
+      setCommentaires(commentaires.filter((comment) => comment.commentaire_id !== id));
       alert('Commentaire supprimé avec succès');
     } catch (error) {
       console.error('Erreur:', error);

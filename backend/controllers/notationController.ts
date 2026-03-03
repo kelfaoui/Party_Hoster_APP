@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Notation from '../models/Notation.js';
+import Salle from '../models/Salle.js';
 
 class NotationController {
     /**
@@ -245,15 +246,53 @@ class NotationController {
                 return;
             }
 
-            if (notation.utilisateur_id !== req.user!.utilisateur_id && req.user!.type !== 'Administrateur') {
-                res.status(403).json({ message: 'Non autorisé' });
+            // Debug: Afficher le type d'utilisateur
+            console.log('=== DEBUG NOTATION DELETE ===');
+            console.log('User type:', req.user!.type);
+            console.log('User ID:', req.user!.utilisateur_id);
+            console.log('Notation user ID:', notation.utilisateur_id);
+            console.log('Notation salle ID:', notation.salle_id);
+            console.log('Type includes Proprietaire:', req.user!.type.includes('Proprietaire'));
+            console.log('Type includes proprietaire:', req.user!.type.toLowerCase().includes('proprietaire'));
+            console.log('Type === Proprietaire:', req.user!.type === 'Proprietaire');
+            console.log('Type === proprietaire:', req.user!.type === 'proprietaire');
+
+            // Admin peut tout supprimer
+            if (req.user!.type === 'Administrateur') {
+                console.log('Admin deletion allowed');
+                await Notation.delete(notationId);
+                res.json({ message: 'Notation supprimée avec succès' });
                 return;
             }
 
-            await Notation.delete(notationId);
-            
-            res.json({ message: 'Notation supprimée avec succès' });
+            // Utilisateur peut supprimer sa propre notation
+            if (notation.utilisateur_id === req.user!.utilisateur_id) {
+                console.log('User deletion allowed (own notation)');
+                await Notation.delete(notationId);
+                res.json({ message: 'Notation supprimée avec succès' });
+                return;
+            }
+
+            // Owner peut supprimer les notations de ses salles (vérification large)
+            if (req.user!.type.includes('Proprietaire') || req.user!.type.toLowerCase().includes('proprietaire')) {
+                console.log('Owner type detected, checking salle ownership...');
+                const salle = await Salle.findById(notation.salle_id as string) as Record<string, unknown> | null;
+                console.log('Salle found:', salle);
+                console.log('Salle owner ID:', salle?.utilisateur_id);
+                
+                if (salle && salle.utilisateur_id === req.user!.utilisateur_id) {
+                    console.log('Owner deletion allowed (owns salle)');
+                    await Notation.delete(notationId);
+                    res.json({ message: 'Notation supprimée avec succès' });
+                    return;
+                }
+            }
+
+            // Si aucune des conditions ci-dessus n'est remplie
+            console.log('Deletion not allowed - 403');
+            res.status(403).json({ message: 'Non autorisé' });
         } catch (error) {
+            console.error('Error in delete notation:', error);
             res.status(500).json({ message: (error as Error).message });
         }
     }

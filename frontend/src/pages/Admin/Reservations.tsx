@@ -12,9 +12,24 @@ import {
 } from 'react-icons/fa';
 import api from '../../api/axiosConfig';
 
+interface Reservation {
+  reservation_id: number;
+  utilisateur_id: number;
+  utilisateur_nom: string;
+  utilisateur_prenom: string;
+  utilisateur_email: string;
+  salle_id: number;
+  salle_nom: string;
+  heure_debut: string;
+  heure_fin: string;
+  prix_total: number;
+  statut: string;
+  date_creation: string;
+}
+
 const Reservations = () => {
-  const [reservations, setReservations] = useState([]);
-  const [filteredReservations, setFilteredReservations] = useState([]);
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [filteredReservations, setFilteredReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -62,11 +77,18 @@ const Reservations = () => {
       filtered = filtered.filter(res => res.statut === statusFilter);
     }
 
+    // Trier par date (la plus récente en premier)
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.date_creation || a.heure_debut);
+      const dateB = new Date(b.date_creation || b.heure_debut);
+      return dateB.getTime() - dateA.getTime();
+    });
+
     setFilteredReservations(filtered);
     setCurrentPage(1);
   };
 
-  const handleDeleteReservation = async (id) => {
+  const handleDeleteReservation = async (id: number) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette réservation ?')) {
       return;
     }
@@ -81,7 +103,7 @@ const Reservations = () => {
     }
   };
 
-  const handleUpdateStatus = async (id, newStatus) => {
+  const handleUpdateStatus = async (id: number, newStatus: string) => {
     try {
       await api.put(`/reservations/${id}/statut`, { statut: newStatus });
       
@@ -96,7 +118,7 @@ const Reservations = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'Confirme': return 'bg-green-100 text-green-800';
       case 'EnAttente': return 'bg-yellow-100 text-yellow-800';

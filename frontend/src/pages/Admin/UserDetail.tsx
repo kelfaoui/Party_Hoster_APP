@@ -16,10 +16,23 @@ import {
 } from 'react-icons/fa';
 import api from '../../api/axiosConfig';
 
+interface User {
+  utilisateur_id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone?: string;
+  adresse?: string;
+  type: string;
+  actif: boolean;
+  date_creation: string;
+  photo_url?: string;
+}
+
 const UserDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -119,26 +132,15 @@ const UserDetail = () => {
           <h1 className="text-2xl font-bold text-gray-800">Détails de l'utilisateur</h1>
         </div>
         <div className="flex space-x-3">
-          <button
-            onClick={handleToggleStatus}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors ${
-              user.actif
-                ? 'bg-red-100 text-red-800 hover:bg-red-200'
-                : 'bg-green-100 text-green-800 hover:bg-green-200'
-            }`}
-          >
-            {user.actif ? (
-              <>
-                <FaTimesCircle className="w-4 h-4" />
-                Désactiver
-              </>
-            ) : (
-              <>
-                <FaCheckCircle className="w-4 h-4" />
-                Activer
-              </>
-            )}
-          </button>
+          {!user.actif && (
+            <button
+              onClick={handleToggleStatus}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors bg-green-100 text-green-800 hover:bg-green-200"
+            >
+              <FaCheckCircle className="w-4 h-4" />
+              Activer
+            </button>
+          )}
           <Link
             to={`/admin/utilisateurs/modifier/${user.utilisateur_id}`}
             className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"

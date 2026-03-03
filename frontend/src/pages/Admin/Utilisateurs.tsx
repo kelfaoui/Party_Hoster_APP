@@ -17,8 +17,19 @@ import {
 } from 'react-icons/fa';
 import api from '../../api/axiosConfig';
 
+interface Utilisateur {
+  utilisateur_id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  numero_telephone?: string;
+  type: string;
+  actif: boolean;
+  date_creation: string;
+}
+
 const Utilisateurs = () => {
-  const [utilisateurs, setUtilisateurs] = useState([]);
+  const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -116,6 +127,11 @@ const Utilisateurs = () => {
       (filters.statut === 'inactif' && !user.actif);
     
     return matchesSearch && matchesRole && matchesStatut;
+  }).sort((a, b) => {
+    // Trier par date (la plus récente en premier)
+    const dateA = new Date(a.date_creation);
+    const dateB = new Date(b.date_creation);
+    return dateB.getTime() - dateA.getTime();
   });
 
   // Pagination

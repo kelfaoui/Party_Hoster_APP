@@ -2,9 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { FaStar, FaSearch, FaFilter, FaTrash } from 'react-icons/fa';
 import api from '../../api/axiosConfig';
 
+interface Notation {
+  notation_id: number;
+  utilisateur_id: number;
+  utilisateur_nom: string;
+  utilisateur_prenom: string;
+  salle_id: number;
+  salle_nom: string;
+  note: number;
+  date_creation: string;
+}
+
 const Notations = () => {
-  const [notations, setNotations] = useState([]);
-  const [filteredNotations, setFilteredNotations] = useState([]);
+  const [notations, setNotations] = useState<Notation[]>([]);
+  const [filteredNotations, setFilteredNotations] = useState<Notation[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [noteFilter, setNoteFilter] = useState('all');
@@ -22,7 +33,7 @@ const Notations = () => {
   const fetchNotations = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/notations/owner?limit=1000');
+      const response = await api.get('/notations/all?limit=1000');
       setNotations(response.data);
       setFilteredNotations(response.data);
     } catch (error) {
@@ -38,7 +49,7 @@ const Notations = () => {
     // Filtrer par terme de recherche
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter((not: any) => 
+      filtered = filtered.filter((not) => 
         not.notation_id.toString().includes(term) ||
         (not.utilisateur_nom && not.utilisateur_nom.toLowerCase().includes(term)) ||
         (not.utilisateur_prenom && not.utilisateur_prenom.toLowerCase().includes(term)) ||
@@ -48,21 +59,28 @@ const Notations = () => {
 
     // Filtrer par note
     if (noteFilter !== 'all') {
-      filtered = filtered.filter((not: any) => not.note === parseInt(noteFilter));
+      filtered = filtered.filter((not) => not.note === parseInt(noteFilter));
     }
+
+    // Trier par date (la plus récente en premier)
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.date_creation);
+      const dateB = new Date(b.date_creation);
+      return dateB.getTime() - dateA.getTime();
+    });
 
     setFilteredNotations(filtered);
     setCurrentPage(1);
   };
 
-  const handleDeleteNotation = async (id: any) => {
+  const handleDeleteNotation = async (id: number) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette notation ?')) {
       return;
     }
 
     try {
       await api.delete(`/notations/${id}`);
-      setNotations(notations.filter((not: any) => not.notation_id !== id));
+      setNotations(notations.filter((not) => not.notation_id !== id));
       alert('Notation supprimée avec succès');
     } catch (error) {
       console.error('Erreur:', error);
