@@ -50,14 +50,24 @@ class NotationController {
         try {
             const { limit = 100, offset = 0 } = req.query;
             
+            console.log('=== NOTATIONS GETALL DEBUG ===');
+            console.log('User type:', req.user!.type);
+            console.log('Limit:', limit, 'Offset:', offset);
+            
             if (req.user!.type !== 'Administrateur' && req.user!.type !== 'Proprietaire') {
+                console.log('❌ User not authorized');
                 res.status(403).json({ message: 'Non autorisé' });
                 return;
             }
 
+            console.log('✅ User authorized, fetching notations...');
             const notations = await Notation.findAll(Number(limit), Number(offset));
+            console.log('📊 Notations found:', notations.length);
+            console.log('📋 First notation sample:', notations[0] || 'No notations');
+            
             res.json(notations);
         } catch (error) {
+            console.error('❌ Error in getAll notations:', error);
             res.status(500).json({ message: (error as Error).message });
         }
     }

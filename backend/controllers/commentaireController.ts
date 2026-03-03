@@ -50,14 +50,24 @@ class CommentaireController {
         try {
             const { limit = 100, offset = 0 } = req.query;
             
+            console.log('=== COMMENTAIRES GETALL DEBUG ===');
+            console.log('User type:', req.user!.type);
+            console.log('Limit:', limit, 'Offset:', offset);
+            
             if (req.user!.type !== 'Administrateur' && req.user!.type !== 'Proprietaire') {
+                console.log('❌ User not authorized');
                 res.status(403).json({ message: 'Non autorisé' });
                 return;
             }
 
+            console.log('✅ User authorized, fetching commentaires...');
             const commentaires = await Commentaire.findAll(Number(limit), Number(offset));
+            console.log('📊 Commentaires found:', commentaires.length);
+            console.log('📋 First commentaire sample:', commentaires[0] || 'No commentaires');
+            
             res.json(commentaires);
         } catch (error) {
+            console.error('❌ Error in getAll commentaires:', error);
             res.status(500).json({ message: (error as Error).message });
         }
     }
