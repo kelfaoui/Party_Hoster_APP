@@ -14,9 +14,7 @@ const dbConfig = {
     queueLimit: 0,
     // Ajout de options pour Railway
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
-    connectTimeout: 10000,
-    acquireTimeout: 10000,
-    timeout: 10000
+    connectTimeout: 10000
 };
 
 console.log('=== DATABASE CONFIG ===');

@@ -46,26 +46,21 @@ class CommentaireController {
      *             schema:
      *               $ref: '#/components/schemas/Error'
      */
-  static async get_all(req: Request, res: Response): Promise<void> {
+    static async getAll(req: Request, res: Response): Promise<void> {
         try {
-            const limit_query = req.query.limit;
-            const offset_query = req.query.offset;
+            const { limit = 100, offset = 0 } = req.query;
 
-            const safe_limit = parseInt(String(limit_query), 10)  100;
-            const safe_offset = parseInt(String(offset_query), 10)  0;
-            
             if (req.user!.type !== 'Administrateur' && req.user!.type !== 'Proprietaire') {
                 res.status(403).json({ message: 'Non autorisé' });
                 return;
             }
 
-            const commentaires = await Commentaire.findAll(safe_limit, safe_offset);
+            const commentaires = await Commentaire.findAll(Number(limit), Number(offset));
             res.json(commentaires);
         } catch (error) {
             res.status(500).json({ message: (error as Error).message });
         }
     }
-
     /**
      * @swagger
      * /commentaires/owner:
