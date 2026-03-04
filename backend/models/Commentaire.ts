@@ -51,7 +51,8 @@ class Commentaire {
         return result.affectedRows;
     }
 
-    static async findAll(limit: number = 100, offset: number = 0): Promise<Record<string, unknown>[]> {
+   
+      static async findAll(limit: number = 100, offset: number = 0): Promise<Record<string, unknown>[]> {
         const [rows] = await pool.execute(
             `SELECT c.*, u.nom as utilisateur_nom, u.prenom as utilisateur_prenom, 
                     s.nom as salle_nom, s.utilisateur_id as proprietaire_id
@@ -59,8 +60,7 @@ class Commentaire {
              JOIN utilisateurs u ON c.utilisateur_id = u.utilisateur_id
              JOIN salles s ON c.salle_id = s.salle_id
              ORDER BY c.date_creation DESC
-             LIMIT ? OFFSET ?`,
-            [limit, offset]
+             LIMIT ${limit} OFFSET ${offset}`,
         ) as [Record<string, unknown>[], unknown];
         return rows;
     }
