@@ -67,8 +67,7 @@ class Notation {
              JOIN utilisateurs u ON n.utilisateur_id = u.utilisateur_id
              JOIN salles s ON n.salle_id = s.salle_id
              ORDER BY n.date_creation DESC
-             LIMIT ? OFFSET ?`,
-            [limit, offset]
+             LIMIT ${limit} OFFSET ${offset}`,
         ) as [Record<string, unknown>[], unknown];
         return rows;
     }

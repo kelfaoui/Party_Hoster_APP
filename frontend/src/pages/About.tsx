@@ -5,8 +5,8 @@ import { FaRocket, FaEye, FaHandshake, FaAward, FaUsers, FaChartLine } from 'rea
 
 const About = () => {
   const teamMembers = [
-    { name: 'Chabane KELFAOUI', role: 'CEO & Fondateur', image: '/public/chabane.jpg' },
-    { name: 'Yidir Cherifi', role: 'Directeur Technique', image: '/public/cherifi.png' },
+    { name: 'Chabane KELFAOUI', role: 'CEO & Fondateur', image: 'https://chabane-kelfaoui.com/images/thumbnail_IMG_KELFAOUI.Chabane-portfolio.jpg' },
+    { name: 'Yidir Cherifi', role: 'Directeur Technique', image: 'https://media.licdn.com/dms/image/v2/D4E35AQG6SgZp_Pfymw/profile-framedphoto-shrink_400_400/B4EZwG2EEuHkAc-/0/1769641362014?e=1773334800&v=beta&t=6GGHTzcpYeQoaBiEivn04K5VExeTYdxVjps_gS4kCw0' },
     { name: 'Djamila Zitouni', role: 'Responsable Commerciale', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
     { name: 'Remi Lemoust', role: 'Developpeur Full-Stack', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
   ];
@@ -29,7 +29,7 @@ const About = () => {
           <div className="container-custom text-center text-white">
             <h1 className="text-5xl font-bold mb-6">À propos de notre organisation</h1>
             <p className="text-xl max-w-3xl mx-auto">
-              Découvrez l'histoire derrière SallesReserve et notre mission de transformer 
+              Découvrez l'histoire derrière Party Hoster et notre mission de transformer 
               la manière dont les entreprises trouvent et réservent des espaces de travail.
             </p>
           </div>
@@ -43,15 +43,15 @@ const About = () => {
                 <h2 className="text-4xl font-bold text-gray-800 mb-6">Notre histoire</h2>
                 <div className="space-y-4 text-gray-600">
                   <p className="text-lg">
-                    Fondée en 2026, SallesReserve est née d'un constat simple : trouver 
-                    la salle de réunion parfaite était souvent un parcours du combattant 
+                    Fondée en 2026, Party Hoster est née d'un constat simple : trouver 
+                    la salle parfaite était souvent un parcours du combattant 
                     pour les professionnels.
                   </p>
                   <p className="text-lg">
-                    Notre fondatrice, Julia Frapatelli, a passé des semaines à chercher 
+                    Nos fondateurs, Chabane et Yidir, ont passé des semaines à chercher 
                     désespérément une salle adaptée pour une réunion importante. 
-                    Frustrée par le manque de transparence des prix et la difficulté 
-                    à vérifier les disponibilités en temps réel, elle a décidé de 
+                    Frustrés par le manque de transparence des prix et la difficulté 
+                    à vérifier les disponibilités en temps réel, ils ont décidé de 
                     créer une solution.
                   </p>
                   <p className="text-lg">
@@ -139,7 +139,7 @@ const About = () => {
                 Devenir Client
               </a>
               <a
-                href="/proprietaires"
+                href="/register"
                 className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-blue-600 transition-colors"
               >
                 Devenir Propriétaire
