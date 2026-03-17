@@ -6,7 +6,7 @@ import { FaRocket, FaEye, FaHandshake, FaAward, FaUsers, FaChartLine } from 'rea
 const About = () => {
   const teamMembers = [
     { name: 'Chabane KELFAOUI', role: 'CEO & Fondateur', image: 'https://chabane-kelfaoui.com/images/thumbnail_IMG_KELFAOUI.Chabane-portfolio.jpg' },
-    { name: 'Yidir Cherifi', role: 'Directeur Technique', image: 'https://media.licdn.com/dms/image/v2/D4E35AQG6SgZp_Pfymw/profile-framedphoto-shrink_400_400/B4EZwG2EEuHkAc-/0/1769641362014?e=1773334800&v=beta&t=6GGHTzcpYeQoaBiEivn04K5VExeTYdxVjps_gS4kCw0' },
+    { name: 'Yidir Cherifi', role: 'Directeur Technique', image: 'https://media.licdn.com/dms/image/v2/D4E35AQG6SgZp_Pfymw/profile-framedphoto-shrink_800_800/B4EZwG2EEuHkAg-/0/1769641362014?e=1774231200&v=beta&t=HOmMuLGwqIuA2h2hTu9-2UXAUgd1ptP8biUHah_zTvM' },
     { name: 'Djamila Zitouni', role: 'Responsable Commerciale', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
     { name: 'Remi Lemoust', role: 'Developpeur Full-Stack', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' },
   ];
