@@ -1,9 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaBars, FaTimes, FaUser, FaDoorOpen, FaTachometerAlt } from 'react-icons/fa';
+import { FaBars, FaTimes, FaUser, FaDoorOpen, FaTachometerAlt, FaSlidersH } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 
-const Header = () => {
+const Header = ({ onSidebarMenuClick = null, sidebarOpen = false, setSidebarOpen = null }: { 
+  onSidebarMenuClick?: (() => void) | null; 
+  sidebarOpen?: boolean; 
+  setSidebarOpen?: ((value: boolean) => void) | null; 
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -17,10 +21,29 @@ const Header = () => {
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container-custom">
         <div className="flex justify-between items-center py-4 px-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <img src="/logo-2.svg" width="164px" />
-          </Link>
+          {/* Left side - Logo and Sidebar Menu */}
+          <div className="flex items-center space-x-4">
+            {/* Sidebar Menu Toggle - Only on Client pages and mobile */}
+            {user?.type === 'Client' && onSidebarMenuClick && (
+              <button
+                className="lg:hidden text-gray-700"
+                onClick={() => {
+                  if (sidebarOpen && setSidebarOpen) {
+                    setSidebarOpen(false);
+                  } else if (onSidebarMenuClick) {
+                    onSidebarMenuClick();
+                  }
+                }}
+              >
+                {sidebarOpen ? <FaTimes size={24} /> : <FaSlidersH size={24} />}
+              </button>
+            )}
+            
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <img src="/logo-2.svg" width="164px" />
+            </Link>
+          </div>
 
           {/* Navigation Desktop */}
           <nav className="hidden md:flex items-center space-x-8">
@@ -100,7 +123,7 @@ const Header = () => {
             )}
           </div>
 
-          {/* Menu Mobile Toggle */}
+          {/* Main Mobile Menu Toggle */}
           <button
             className="md:hidden text-gray-700"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -109,7 +132,7 @@ const Header = () => {
           </button>
         </div>
 
-        {/* Menu Mobile */}
+        {/* Main Menu Mobile */}
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t">
             <div className="flex flex-col space-y-4 py-4 px-4">

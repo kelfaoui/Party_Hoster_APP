@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import ClientSidebar from './ClientSidebar';
 import Header from '../Header';
 import Footer from '../Footer';
@@ -9,9 +9,16 @@ const ClientLayout = () => {
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [user, setUser] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  // Fermer le sidebar quand la route change
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
-    const checkAdminAccess = async () => {
+    const checkClientAccess = async () => {
       try {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
@@ -24,7 +31,7 @@ const ClientLayout = () => {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
 
-        // Vérifier si l'utilisateur est administrateur
+        // Vérifier si l'utilisateur est client
         if (parsedUser.type !== 'Client') {
           setIsClient(false);
           return;
@@ -39,14 +46,14 @@ const ClientLayout = () => {
         }
 
       } catch (error) {
-        console.error('Erreur de vérification admin:', error);
+        console.error('Erreur de vérification client:', error);
         setIsClient(false);
       } finally {
         setLoading(false);
       }
     };
 
-    checkAdminAccess();
+    checkClientAccess();
   }, []);
 
   if (loading) {
@@ -62,16 +69,34 @@ const ClientLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <Header />
-      <div className="flex flex-1">
-        <ClientSidebar />
-        <div className="ml-64 flex-1">
-          <main className="p-6">
-            <Outlet />
-          </main>
-          <Footer />
-        </div>
+    <div className="min-h-screen bg-white">
+      {/* Sidebar Desktop */}
+      <div className="hidden lg:block">
+        <ClientSidebar onClose={() => {}} />
+      </div>
+      
+      {/* Sidebar Mobile (overlay) */}
+      {sidebarOpen && (
+        <>
+          {/* Overlay */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+          {/* Sidebar Mobile */}
+          <div className="fixed inset-y-0 left-0 z-50 lg:hidden">
+            <ClientSidebar onClose={() => setSidebarOpen(false)} />
+          </div>
+        </>
+      )}
+
+      {/* Main Content */}
+      <div className="lg:ml-64">
+        <Header onSidebarMenuClick={() => setSidebarOpen(true)} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <main className="p-4 lg:p-6">
+          <Outlet />
+        </main>
+        <Footer />
       </div>
     </div>
   );
