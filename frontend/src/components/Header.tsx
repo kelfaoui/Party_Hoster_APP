@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaBars, FaTimes, FaUser, FaDoorOpen, FaTachometerAlt } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 
-const Header = ({ onMenuClick }) => {
+const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -17,23 +17,10 @@ const Header = ({ onMenuClick }) => {
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container-custom">
         <div className="flex justify-between items-center py-4 px-4">
-          {/* Left side - Menu burger and Logo */}
-          <div className="flex items-center space-x-4">
-            {/* Menu Burger - Mobile only for ClientLayout */}
-            {onMenuClick && (
-              <button
-                onClick={onMenuClick}
-                className="lg:hidden p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl"
-              >
-                <FaBars className="w-5 h-5" />
-              </button>
-            )}
-            
-            {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <img src="/logo-2.svg" width="164px" />
-            </Link>
-          </div>
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <img src="/logo-2.svg" width="164px" />
+          </Link>
 
           {/* Navigation Desktop */}
           <nav className="hidden md:flex items-center space-x-8">
@@ -113,19 +100,17 @@ const Header = ({ onMenuClick }) => {
             )}
           </div>
 
-          {/* Menu Mobile Toggle - Only show if no onMenuClick */}
-          {!onMenuClick && (
-            <button
-              className="md:hidden text-gray-700"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-            </button>
-          )}
+          {/* Menu Mobile Toggle */}
+          <button
+            className="md:hidden text-gray-700"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+          </button>
         </div>
 
-        {/* Menu Mobile - Only show if no onMenuClick */}
-        {!onMenuClick && isMenuOpen && (
+        {/* Menu Mobile */}
+        {isMenuOpen && (
           <div className="md:hidden bg-white border-t">
             <div className="flex flex-col space-y-4 py-4 px-4">
               {user?.type === 'Client' && (

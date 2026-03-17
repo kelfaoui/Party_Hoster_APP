@@ -13,7 +13,7 @@ import {
   FaTimes
 } from 'react-icons/fa';
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -67,7 +67,10 @@ const AdminSidebar = () => {
   return (
     <div className="fixed inset-y-0 left-0 z-50 w-full lg:w-64 bg-gradient-to-r from-blue-400 to-blue-600 text-white lg:block transform transition-transform duration-300 ease-in-out">
       {/* Close button for mobile */}
-      <button className="lg:hidden absolute top-4 right-4 p-2 text-white hover:bg-blue-500 rounded-lg">
+      <button 
+        onClick={onClose}
+        className="lg:hidden absolute top-4 right-4 p-2 text-white hover:bg-blue-500 rounded-lg"
+      >
         <FaTimes className="w-5 h-5" />
       </button>
       

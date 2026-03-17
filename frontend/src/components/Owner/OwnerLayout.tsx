@@ -71,7 +71,7 @@ const OwnerLayout = () => {
     <div className="min-h-screen bg-white">
       {/* Sidebar Desktop */}
       <div className="hidden lg:block">
-        <OwnerSidebar />
+        <OwnerSidebar onClose={() => {}} />
       </div>
       
       {/* Sidebar Mobile (overlay) */}
@@ -84,7 +84,7 @@ const OwnerLayout = () => {
           />
           {/* Sidebar Mobile */}
           <div className="fixed inset-y-0 left-0 z-50 lg:hidden">
-            <OwnerSidebar />
+            <OwnerSidebar onClose={() => setSidebarOpen(false)} />
           </div>
         </>
       )}
