@@ -1,0 +1,1017 @@
+{
+  "info": {
+    "name": "Party Hoster API",
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "description": "Complete API collection for the Party Hoster room reservation system.\n\n## Setup\n1. Import this collection into Postman\n2. Create an environment with the variable `BASE_URL` set to `http://localhost:5000`\n3. Register or login to obtain a JWT token\n4. The login request auto-saves the token to `CLIENT_TOKEN` via a test script\n\n## Auth Roles\n- **Client** – regular user, can book rooms, leave ratings/comments\n- **Proprietaire** – room owner, can manage their rooms and see their reservations\n- **Administrateur** – full access to all endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "BASE_URL", "value": "http://localhost:5000", "type": "string" },
+    { "key": "CLIENT_TOKEN", "value": "", "type": "string" },
+    { "key": "OWNER_TOKEN", "value": "", "type": "string" },
+    { "key": "ADMIN_TOKEN", "value": "", "type": "string" },
+    { "key": "SALLE_ID", "value": "1", "type": "string" },
+    { "key": "RESERVATION_ID", "value": "1", "type": "string" },
+    { "key": "NOTATION_ID", "value": "1", "type": "string" },
+    { "key": "COMMENTAIRE_ID", "value": "1", "type": "string" },
+    { "key": "USER_ID", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/health",
+              "host": ["{{BASE_URL}}"],
+              "path": ["health"]
+            },
+            "description": "Check that the API server is running."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Body has status OK', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.status).to.equal('OK');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Utilisateurs",
+      "item": [
+        {
+          "name": "Register (Client)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"client@partyhost.com\",\n  \"mot_de_passe\": \"Client123!\",\n  \"nom\": \"Dupont\",\n  \"prenom\": \"Jean\",\n  \"numero_telephone\": \"0612345678\",\n  \"type\": \"Client\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/register",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register (Proprietaire)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"owner@partyhost.com\",\n  \"mot_de_passe\": \"Owner123!\",\n  \"nom\": \"Martin\",\n  \"prenom\": \"Sophie\",\n  \"numero_telephone\": \"0698765432\",\n  \"type\": \"Proprietaire\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/register",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Client) - saves CLIENT_TOKEN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"client@partyhost.com\",\n  \"mot_de_passe\": \"Client123!\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/login",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "login"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('CLIENT_TOKEN', json.token);",
+                  "  pm.test('Token received', () => pm.expect(json.token).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (Proprietaire) - saves OWNER_TOKEN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"owner@partyhost.com\",\n  \"mot_de_passe\": \"Owner123!\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/login",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "login"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('OWNER_TOKEN', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (Admin) - saves ADMIN_TOKEN",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@partyhost.com\",\n  \"mot_de_passe\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/login",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "login"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  pm.collectionVariables.set('ADMIN_TOKEN', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/profile",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Dupont\",\n  \"prenom\": \"Jean-Pierre\",\n  \"numero_telephone\": \"0611223344\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/profile",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs?limit=10&offset=0",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs"],
+              "query": [
+                { "key": "limit", "value": "10" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/{{USER_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "{{USER_ID}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User by ID (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Dupont\",\n  \"prenom\": \"Jean\",\n  \"email\": \"client@partyhost.com\",\n  \"telephone\": \"0612345678\",\n  \"type\": \"Client\",\n  \"actif\": true\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/{{USER_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "{{USER_ID}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activate User (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/{{USER_ID}}/activate",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "{{USER_ID}}", "activate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate User (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/{{USER_ID}}/deactivate",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "{{USER_ID}}", "deactivate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Status (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"actif\": false\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/{{USER_ID}}/status",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "{{USER_ID}}", "status"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Salles",
+      "item": [
+        {
+          "name": "Get All Salles (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles?limit=20&offset=0",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles"],
+              "query": [
+                { "key": "limit", "value": "20" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Salles - With Filters (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles?localisation=Paris&capacite_min=10&prix_max=100",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles"],
+              "query": [
+                { "key": "localisation", "value": "Paris" },
+                { "key": "capacite_min", "value": "10" },
+                { "key": "prix_max", "value": "100" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Available Salles (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles/disponibilites?date=2025-07-15&heure_debut=14:00&heure_fin=18:00",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles", "disponibilites"],
+              "query": [
+                { "key": "date", "value": "2025-07-15" },
+                { "key": "heure_debut", "value": "14:00" },
+                { "key": "heure_fin", "value": "18:00" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Salles (Proprietaire)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{OWNER_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles/mes-salles",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles", "mes-salles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Salle by ID (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles/{{SALLE_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles", "{{SALLE_ID}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Salle Reservations (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{OWNER_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles/{{SALLE_ID}}/reservations",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles", "{{SALLE_ID}}", "reservations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Salle (Proprietaire/Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{OWNER_TOKEN}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "nom", "value": "Salle de Conference Premium", "type": "text" },
+                { "key": "description", "value": "Salle moderne avec equipements audiovisuels", "type": "text" },
+                { "key": "localisation", "value": "15 Rue de la Paix, 75001 Paris", "type": "text" },
+                { "key": "capacite", "value": "30", "type": "text" },
+                { "key": "prix_par_heure", "value": "75", "type": "text" },
+                { "key": "longitude", "value": "2.3308", "type": "text" },
+                { "key": "latitude", "value": "48.8698", "type": "text" },
+                { "key": "equipements", "value": "WiFi, Projecteur 4K, Tableau blanc, Climatisation", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.salle_id) pm.collectionVariables.set('SALLE_ID', json.salle_id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload Image for Salle (Public)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "image", "type": "file", "src": "/path/to/your/image.jpg" }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles/upload-image",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles", "upload-image"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Salle (Auth)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{OWNER_TOKEN}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Salle de Conference Premium - Renovee\",\n  \"prix_par_heure\": 85,\n  \"capacite\": 35,\n  \"disponibilite\": true\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles/{{SALLE_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles", "{{SALLE_ID}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Salle (Auth)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{OWNER_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles/{{SALLE_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles", "{{SALLE_ID}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "Create Reservation (Auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"salle_id\": {{SALLE_ID}},\n  \"heure_debut\": \"2025-07-15T14:00:00\",\n  \"heure_fin\": \"2025-07-15T17:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/reservations",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "reservations"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.reservation_id) pm.collectionVariables.set('RESERVATION_ID', json.reservation_id);",
+                  "  pm.test('Has prix_total', () => pm.expect(json.prix_total).to.be.a('number'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get My Reservations (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/reservations/mes-reservations",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "reservations", "mes-reservations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Owner Reservations (Proprietaire)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{OWNER_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/reservations/owner-reservations",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "reservations", "owner-reservations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Reservations (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/reservations?limit=20&offset=0",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "reservations"],
+              "query": [
+                { "key": "limit", "value": "20" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Reservation by ID (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/reservations/{{RESERVATION_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "reservations", "{{RESERVATION_ID}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Reservation Status (Auth)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{OWNER_TOKEN}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"Confirmee\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/reservations/{{RESERVATION_ID}}/statut",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "reservations", "{{RESERVATION_ID}}", "statut"]
+            },
+            "description": "Valid values: EnAttente, Confirmee, Annulee"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Reservation (Auth)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/reservations/{{RESERVATION_ID}}/annuler",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "reservations", "{{RESERVATION_ID}}", "annuler"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Reservation (Auth)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/reservations/{{RESERVATION_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "reservations", "{{RESERVATION_ID}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notations",
+      "item": [
+        {
+          "name": "Create or Update Notation (Auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"salle_id\": {{SALLE_ID}},\n  \"note\": 4\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/notations",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "notations"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.notation_id) pm.collectionVariables.set('NOTATION_ID', json.notation_id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Notations for Salle (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/notations/salle/{{SALLE_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "notations", "salle", "{{SALLE_ID}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Notation for Salle (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/notations/ma-notation/{{SALLE_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "notations", "ma-notation", "{{SALLE_ID}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Notations (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/notations/all?limit=20&offset=0",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "notations", "all"],
+              "query": [
+                { "key": "limit", "value": "20" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Owner Notations (Proprietaire)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{OWNER_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/notations/owner?limit=20&offset=0",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "notations", "owner"],
+              "query": [
+                { "key": "limit", "value": "20" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Notation (Auth)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/notations/{{NOTATION_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "notations", "{{NOTATION_ID}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Commentaires",
+      "item": [
+        {
+          "name": "Get Comments for Salle (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/commentaires/salle/{{SALLE_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "commentaires", "salle", "{{SALLE_ID}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Comment (Auth)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"salle_id\": {{SALLE_ID}},\n  \"commentaire\": \"Excellente salle, tres bien equipee et facile d'acces. Je recommande !\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/commentaires",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "commentaires"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.commentaire_id) pm.collectionVariables.set('COMMENTAIRE_ID', json.commentaire_id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Comments (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ADMIN_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/commentaires/all?limit=20&offset=0",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "commentaires", "all"],
+              "query": [
+                { "key": "limit", "value": "20" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Owner Comments (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{OWNER_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/commentaires/owner?limit=20&offset=0",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "commentaires", "owner"],
+              "query": [
+                { "key": "limit", "value": "20" },
+                { "key": "offset", "value": "0" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Comment (Auth)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"commentaire\": \"Commentaire modifie : Toujours une excellente salle.\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/commentaires/{{COMMENTAIRE_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "commentaires", "{{COMMENTAIRE_ID}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Comment (Auth)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/commentaires/{{COMMENTAIRE_ID}}",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "commentaires", "{{COMMENTAIRE_ID}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth Error Cases",
+      "item": [
+        {
+          "name": "401 - No Token on Protected Route",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/profile",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "profile"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Returns 401 without token', () => pm.response.to.have.status(401));"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "401 - Invalid Token",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer invalid.jwt.token" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/profile",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "profile"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Returns 401 for invalid token', () => pm.response.to.have.status(401));"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 - Client Accessing Admin Route",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" }],
+            "url": {
+              "raw": "{{BASE_URL}}/api/utilisateurs/1",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "utilisateurs", "1"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Returns 403 for non-admin', () => pm.response.to.have.status(403));"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "403 - Client Creating Salle (Owner only)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{CLIENT_TOKEN}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "nom", "value": "Forbidden Salle", "type": "text" },
+                { "key": "description", "value": "Should be forbidden", "type": "text" },
+                { "key": "localisation", "value": "Paris", "type": "text" },
+                { "key": "capacite", "value": "10", "type": "text" },
+                { "key": "prix_par_heure", "value": "30", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/api/salles",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "salles"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Returns 403 for non-owner', () => pm.response.to.have.status(403));"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "404 - Route Not Found",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/api/nonexistent-route",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "nonexistent-route"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.test('Returns 404 for unknown route', () => pm.response.to.have.status(404));"]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

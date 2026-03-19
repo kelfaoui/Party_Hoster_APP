@@ -12,7 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": false,
-    "types": ["node"],
+    "types": ["node", "mocha"],
     "typeRoots": ["./node_modules/@types"],
     "allowSyntheticDefaultImports": true,
     "sourceMap": false
@@ -27,5 +27,5 @@
     "types/**/*.ts",
     "server.ts"
   ],
-  "exclude": ["node_modules", "dist","test"]
+  "exclude": ["node_modules", "dist"]
 }
