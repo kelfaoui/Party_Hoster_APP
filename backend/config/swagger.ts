@@ -7,7 +7,7 @@ const options = {
     info: {
       title: 'Party Hoster API',
       version: '1.0.0',
-      description: 'API complète pour la gestion de réservations de salles de fête',
+      description: 'API de gestion de réservations de salles',
       contact: {
         name: 'Support Party Hoster',
         email: 'support@partyhoster.com',
